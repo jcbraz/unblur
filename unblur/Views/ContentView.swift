@@ -8,24 +8,25 @@ struct ContentView: View {
     @State private var showDisplayView: Bool = false
     @State private var currentContext: PriorityContext
     @Environment(\.colorScheme) var colorScheme
-    
+
     private let contextManager = ContextManagement()
     private let priorityManager = PriorityManagement()
-    
+
     init() {
-        let isFirstLaunch = !contextManager.checkDatabaseExistence() // Negated to reflect settings check
-        let currentContext = isFirstLaunch
+        let isFirstLaunch = !contextManager.checkDatabaseExistence()  // Negated to reflect settings check
+        let currentContext =
+            isFirstLaunch
             ? PriorityContext(defaultTaskNumber: 3, previousDayTaskView: true)
             : contextManager.loadSettings()
         let previosDayPriorities = priorityManager.getPreviousDayPriorties()
-        
-        
+
         _isFirstLaunch = State(initialValue: isFirstLaunch)
         _currentContext = State(initialValue: currentContext)
-        _priorities = State(initialValue: Array(repeating: "", count: currentContext.defaultTaskNumber))
+        _priorities = State(
+            initialValue: Array(repeating: "", count: currentContext.defaultTaskNumber))
         _previousDayPriorities = State(initialValue: previosDayPriorities)
     }
-    
+
     private func savePriorities() {
         let currentTime = Date().timeIntervalSince1970
         for (index, text) in priorities.enumerated() {
@@ -40,44 +41,44 @@ struct ContentView: View {
                 priorityManager.insertPriority(priority)
             }
         }
-        
-        showDisplayView = true // Trigger navigation
+
+        showDisplayView = true  // Trigger navigation
     }
-    
+
     private func addPriorityLocaly() {
         priorities.append("")
     }
-    
+
     private func removePriority() {
         let lastElement: String? = priorities.popLast()
-        if (lastElement != nil) {
+        if lastElement != nil {
             print("Removed \(lastElement!)")
         }
     }
-    
-    
+
     private func getSubmittedPrioritiesObjects() -> [Priority] {
         var currentPriorities: [Priority] = []
         for (index, text) in priorities.enumerated() {
             if !text.isEmpty {
-                currentPriorities.append(Priority(
-                    id: UUID().uuidString,
-                    timestamp: Date().timeIntervalSince1970,
-                    text: text,
-                    priority: index + 1,
-                    isEdited: false
-                ))
+                currentPriorities.append(
+                    Priority(
+                        id: UUID().uuidString,
+                        timestamp: Date().timeIntervalSince1970,
+                        text: text,
+                        priority: index + 1,
+                        isEdited: false
+                    ))
             }
         }
-        
+
         return currentPriorities
     }
-    
+
     var body: some View {
         NavigationView {
             ZStack {
                 if showDisplayView {
-                   let currentPriorities = getSubmittedPrioritiesObjects()
+                    let currentPriorities = getSubmittedPrioritiesObjects()
                     DisplayView(
                         priorities: currentPriorities,
                         showDisplayView: $showDisplayView,
@@ -90,13 +91,13 @@ struct ContentView: View {
         }
         .frame(minWidth: 500, minHeight: 500)
     }
-    
+
     private var mainView: some View {
         GeometryReader { geometry in
             HStack(alignment: .center, spacing: 20) {
-                
+
                 if currentContext.previousDayTaskView && !previousDayPriorities.isEmpty {
-                
+
                     VStack(alignment: .center, spacing: 20) {
                         Spacer()
                         HStack {
@@ -148,21 +149,21 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding()
-                        
-                        VStack(alignment: .center, spacing: 10) {
-                            Text("Yesterday's Priorities")
-                                .font(.system(size: 16, weight: .semibold))
-                                .padding()
 
-                            ForEach(previousDayPriorities) { priority in
-                                HStack(alignment: .center) {
-                                    Text(priority.text)
-                                }
-                                .foregroundColor(.secondary)
+                    VStack(alignment: .center, spacing: 10) {
+                        Text("Yesterday's Priorities")
+                            .font(.system(size: 16, weight: .semibold))
+                            .padding()
+
+                        ForEach(previousDayPriorities) { priority in
+                            HStack(alignment: .center) {
+                                Text(priority.text)
                             }
+                            .foregroundColor(.secondary)
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     Spacer()
                     HStack {
@@ -218,7 +219,7 @@ struct ContentView: View {
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color(colorScheme == .dark ? .darkGray : .white).opacity(0.1),
-                        Color(colorScheme == .dark ? .black : .gray).opacity(0.2)
+                        Color(colorScheme == .dark ? .black : .gray).opacity(0.2),
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing

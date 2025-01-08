@@ -5,7 +5,6 @@
 //  Created by Jose Braz on 05/01/2025.
 //
 
-
 import Foundation
 
 struct PriorityContext {
