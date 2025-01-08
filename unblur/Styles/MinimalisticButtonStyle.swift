@@ -11,7 +11,7 @@ struct MinimalisticButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding()
-            .frame(maxWidth: .infinity) // Makes the button full width
+            .frame(maxWidth: .infinity)  // Makes the button full width
             .background(configuration.isPressed ? Color.gray.opacity(0.2) : Color.white)
             .foregroundColor(.gray)
             .overlay(
