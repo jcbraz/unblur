@@ -13,7 +13,7 @@ struct ContentView: View {
     private let priorityManager = PriorityManagement()
 
     init() {
-        let isFirstLaunch = !contextManager.checkDatabaseExistence()  // Negated to reflect settings check
+        let isFirstLaunch = !contextManager.checkDatabaseExistence()
         let currentContext =
             isFirstLaunch
             ? PriorityContext(defaultTaskNumber: 3, previousDayTaskView: true)
@@ -42,7 +42,7 @@ struct ContentView: View {
             }
         }
 
-        showDisplayView = true  // Trigger navigation
+        showDisplayView = true
     }
 
     private func addPriorityLocaly() {
@@ -70,8 +70,55 @@ struct ContentView: View {
                     ))
             }
         }
-
         return currentPriorities
+    }
+
+    private var previousDayView: some View {
+        VStack(alignment: .center, spacing: 10) {
+            Text("Yesterday's Priorities")
+                .font(.system(size: 16, weight: .semibold))
+                .padding()
+
+            ForEach(previousDayPriorities) { priority in
+                HStack(alignment: .center) {
+                    Text(priority.text)
+                }
+                .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var headerView: some View {
+        VStack {
+            Text("Good Morning Lusine!")
+                .font(.system(size: 24, weight: .bold))
+            Text("What are your main priorities for today?")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var controlButtons: some View {
+        HStack(spacing: 10) {
+            Button(action: savePriorities) {
+                Text("Save Priorities")
+            }
+            Spacer()
+            Button(action: addPriorityLocaly) {
+                Image(systemName: "plus.circle.fill")
+                Text("Add")
+            }
+            .buttonStyle(.borderless)
+
+            Button(action: removePriority) {
+                Image(systemName: "minus.circle.fill")
+                Text("Remove")
+            }
+            .buttonStyle(.borderless)
+            .disabled(priorities.count <= 1)
+        }
     }
 
     var body: some View {
@@ -93,139 +140,53 @@ struct ContentView: View {
     }
 
     private var mainView: some View {
-        GeometryReader { geometry in
-            HStack(alignment: .center, spacing: 20) {
-
-                if currentContext.previousDayTaskView && !previousDayPriorities.isEmpty {
-
-                    VStack(alignment: .center, spacing: 20) {
-                        Spacer()
-                        HStack {
-                            Text("Good Morning Lusine!")
-                                .font(.system(size: 24, weight: .bold))
-                        }
-                        Text("What are your main priorities for today?")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-
-                        VStack(alignment: .center, spacing: 13) {
-                            ForEach(priorities.indices, id: \.self) { index in
-                                HStack {
-                                    Text("\(index + 1).")
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 14, alignment: .leading)
-                                    TextField("Priority \(index + 1)", text: $priorities[index])
-                                        .textFieldStyle(PlainTextFieldStyle())
-                                        .padding(8)
-                                        .background(
-                                            colorScheme == .dark
-                                                ? Color.black.opacity(0.3)
-                                                : Color.white.opacity(0.3)
-                                        )
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-
-                        HStack(spacing: 10) {
-                            Button(action: savePriorities) {
-                                Text("Save Priorities")
-                            }
+            GeometryReader { geometry in
+                HStack(alignment: .center, spacing: 20) {
+                    if currentContext.previousDayTaskView && !previousDayPriorities.isEmpty {
+                        VStack(alignment: .center, spacing: 20) {
                             Spacer()
-                            Button(action: addPriorityLocaly) {
-                                Image(systemName: "plus.circle.fill")
-                                Text("Add")
-                            }
-                            .buttonStyle(.borderless)
-
-                            Button(action: removePriority) {
-                                Image(systemName: "minus.circle.fill")
-                                Text("Remove")
-                            }
-                            .buttonStyle(.borderless)
-                            .disabled(priorities.count <= 1)
+                            headerView
+                            
+                            PriorityInputView(
+                                priorities: $priorities,
+                                onSave: savePriorities
+                            )
+                            
+                            controlButtons
+                            Spacer()
                         }
-                        Spacer()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding()
+                        
+                        previousDayView
+                    } else {
+                        VStack(spacing: 20) {
+                            Spacer()
+                            headerView
+                            
+                            PriorityInputView(
+                                priorities: $priorities,
+                                onSave: savePriorities
+                            )
+                            
+                            controlButtons
+                            Spacer()
+                        }
+                        .padding()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
-
-                    VStack(alignment: .center, spacing: 10) {
-                        Text("Yesterday's Priorities")
-                            .font(.system(size: 16, weight: .semibold))
-                            .padding()
-
-                        ForEach(previousDayPriorities) { priority in
-                            HStack(alignment: .center) {
-                                Text(priority.text)
-                            }
-                            .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    Spacer()
-                    HStack {
-                        Text("Good Morning Lusine!")
-                            .font(.system(size: 24, weight: .bold))
-                    }
-                    Text("What are your main priorities for today?")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-
-                    VStack(alignment: .center, spacing: 13) {
-                        ForEach(priorities.indices, id: \.self) { index in
-                            HStack {
-                                Text("\(index + 1).")
-                                    .foregroundColor(.secondary)
-                                    .frame(width: 14, alignment: .leading)
-                                TextField("Priority \(index + 1)", text: $priorities[index])
-                                    .textFieldStyle(PlainTextFieldStyle())
-                                    .padding(8)
-                                    .background(
-                                        colorScheme == .dark
-                                            ? Color.black.opacity(0.3)
-                                            : Color.white.opacity(0.3)
-                                    )
-                                    .cornerRadius(8)
-                            }
-                        }
-                    }
-
-                    HStack(spacing: 10) {
-                        Button(action: savePriorities) {
-                            Text("Save Priorities")
-                        }
-                        Spacer()
-                        Button(action: addPriorityLocaly) {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add")
-                        }
-                        .buttonStyle(.borderless)
-
-                        Button(action: removePriority) {
-                            Image(systemName: "minus.circle.fill")
-                            Text("Remove")
-                        }
-                        .buttonStyle(.borderless)
-                        .disabled(priorities.count <= 1)
-                    }
-                    Spacer()
                 }
-            }
-            .padding()
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(colorScheme == .dark ? .darkGray : .white).opacity(0.1),
-                        Color(colorScheme == .dark ? .black : .gray).opacity(0.2),
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                .padding()
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color(colorScheme == .dark ? .darkGray : .white).opacity(0.1),
+                            Color(colorScheme == .dark ? .black : .gray).opacity(0.2),
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
                 )
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
-    }
 }
