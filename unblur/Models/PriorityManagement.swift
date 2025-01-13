@@ -28,6 +28,32 @@ class PriorityManagement {
             return
         }
     }
+    
+    private func getDefaultTaskNumber() -> Int? {
+        var taskNumber: Int = 0
+        
+        let querySQL = """
+            SELECT
+                default_task_number
+            FROM settings
+            LIMIT 1;
+        """
+        
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                taskNumber = Int(sqlite3_column_int(statement, 0))
+            }
+        } else {
+            print("Error getting default task number")
+            return nil
+        }
+        
+        sqlite3_finalize(statement)
+        
+        return taskNumber
+    }
 
     func insertPriority(_ priority: Priority) {
         let insertSQL = """
@@ -54,7 +80,6 @@ class PriorityManagement {
     func getPreviousDayPriorties() -> [Priority] {
         var priorities: [Priority] = []
 
-        // Calculate start and end timestamps for the previous day
         let calendar = Calendar.current
         let now = Date()
         let startOfToday = calendar.startOfDay(for: now)
@@ -63,13 +88,15 @@ class PriorityManagement {
 
         let startTimestamp = startOfYesterday.timeIntervalSince1970
         let endTimestamp = endOfYesterday.timeIntervalSince1970
+        
+        let defaultTaskNumber = getDefaultTaskNumber() ?? 3;
 
         let querySQL = """
                 SELECT id, timestamp, text, priority, is_edited
                 FROM priorities
                 WHERE timestamp >= ? AND timestamp <= ?
                 ORDER BY priority ASC
-                LIMIT 3;
+                LIMIT ?;
             """
 
         var statement: OpaquePointer?
@@ -77,6 +104,53 @@ class PriorityManagement {
         if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_double(statement, 1, startTimestamp)
             sqlite3_bind_double(statement, 2, endTimestamp)
+            sqlite3_bind_int(statement, 3, Int32(defaultTaskNumber))
+
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = String(cString: sqlite3_column_text(statement, 0))
+                let timestamp = sqlite3_column_double(statement, 1)
+                let text = String(cString: sqlite3_column_text(statement, 2))
+                let priority = Int(sqlite3_column_int(statement, 3))
+                let isEdited = sqlite3_column_int(statement, 4) != 0
+
+                priorities.append(
+                    Priority(
+                        id: id,
+                        timestamp: timestamp,
+                        text: text,
+                        priority: priority,
+                        isEdited: isEdited
+                    ))
+            }
+        }
+
+        sqlite3_finalize(statement)
+        return priorities
+    }
+    
+    func getCurrentDayPriorities() -> [Priority] {
+        var priorities: [Priority] = []
+
+        let calendar = Calendar.current
+        let startOfTodayTimestamp = calendar.startOfDay(for: .now).timeIntervalSince1970
+        let defaultTaskNumber = getDefaultTaskNumber() ?? 3;
+
+        let querySQL = """
+                SELECT *
+                FROM (
+                    SELECT id, timestamp, text, priority, is_edited
+                    FROM priorities
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                )
+                ORDER BY priority ASC
+            """
+
+        var statement: OpaquePointer?
+
+        if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_double(statement, 1, startOfTodayTimestamp)
+            sqlite3_bind_int(statement, 3, Int32(defaultTaskNumber))
 
             while sqlite3_step(statement) == SQLITE_ROW {
                 let id = String(cString: sqlite3_column_text(statement, 0))
