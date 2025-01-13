@@ -140,4 +140,39 @@ class ContextManagement {
         sqlite3_finalize(statement)
         return context
     }
+    
+    func getDefaultTaskNumber() -> Int {
+        let querySQL = "SELECT default_task_number FROM settings LIMIT 1;"
+        var statement: OpaquePointer?
+        var defaultTaskNumber: Int = 0
+        
+        if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+            if sqlite3_step(statement) == SQLITE_ROW {
+                defaultTaskNumber = Int(sqlite3_column_int(statement, 0))
+            }
+        }
+        
+        if defaultTaskNumber == 0 {
+            defaultTaskNumber = 3
+        }
+        
+        sqlite3_finalize(statement)
+        return defaultTaskNumber
+    }
+    
+    func updateDefaultTaskNumber(_ oldValue: Int, _ newValue: Int) -> Void {
+        let updateSQL = "UPDATE settings SET default_task_number = ? WHERE default_task_number = ?;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, updateSQL, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_int(statement, 1, Int32(newValue))
+            sqlite3_bind_int(statement, 2, Int32(oldValue))
+        }
+        
+        if sqlite3_step(statement) != SQLITE_DONE {
+            print("Error updating default task number")
+        }
+        
+        sqlite3_finalize(statement)
+    }
 }

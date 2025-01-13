@@ -7,10 +7,16 @@ struct ContentView: View {
     @State private var isFirstLaunch: Bool
     @State private var showDisplayView: Bool = false
     @State private var currentContext: PriorityContext
+    @State private var isUpdatingSettings = false
     @Environment(\.colorScheme) var colorScheme
 
     private let contextManager = ContextManagement()
     private let priorityManager = PriorityManagement()
+    
+    enum ActionType {
+        case update
+    }
+    
 
     init() {
         let isFirstLaunch = !contextManager.checkDatabaseExistence()
@@ -92,7 +98,7 @@ struct ContentView: View {
 
     private var headerView: some View {
         VStack {
-            Text("Good Morning Lusine!")
+            Text("Good Morning José!")
                 .font(.system(size: 24, weight: .bold))
             Text("What are your main priorities for today?")
                 .font(.subheadline)
@@ -133,6 +139,23 @@ struct ContentView: View {
                     )
                 } else {
                     mainView
+                        .overlay(
+                            VStack {
+                                HStack {
+                                    Spacer()
+                                    if isUpdatingSettings {
+                                        UpdateSettingsMenu(
+                                            isUpdatingSettings: $isUpdatingSettings,
+                                            contextManager: contextManager
+                                        )
+                                    } else {
+                                        MenuButton()
+                                    }
+                                }
+                                .padding()
+                                Spacer()
+                            }
+                        )
                 }
             }
         }
@@ -140,53 +163,78 @@ struct ContentView: View {
     }
 
     private var mainView: some View {
-            GeometryReader { geometry in
-                HStack(alignment: .center, spacing: 20) {
-                    if currentContext.previousDayTaskView && !previousDayPriorities.isEmpty {
-                        VStack(alignment: .center, spacing: 20) {
-                            Spacer()
-                            headerView
-                            
-                            PriorityInputView(
-                                priorities: $priorities,
-                                onSave: savePriorities
-                            )
-                            
-                            controlButtons
-                            Spacer()
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding()
+        GeometryReader { geometry in
+            HStack(alignment: .center, spacing: 20) {
+                if currentContext.previousDayTaskView && !previousDayPriorities.isEmpty {
+                    VStack(alignment: .center, spacing: 20) {
+                        Spacer()
+                        headerView
                         
-                        previousDayView
-                    } else {
-                        VStack(spacing: 20) {
-                            Spacer()
-                            headerView
-                            
-                            PriorityInputView(
-                                priorities: $priorities,
-                                onSave: savePriorities
-                            )
-                            
-                            controlButtons
-                            Spacer()
-                        }
-                        .padding()
+                        PriorityInputView(
+                            priorities: $priorities,
+                            onSave: savePriorities
+                        )
+                        
+                        controlButtons
+                        Spacer()
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+                    
+                    previousDayView
+                } else {
+                    VStack(spacing: 20) {
+                        Spacer()
+                        headerView
+                        
+                        PriorityInputView(
+                            priorities: $priorities,
+                            onSave: savePriorities
+                        )
+                        
+                        controlButtons
+                        Spacer()
+                    }
+                    .padding()
                 }
-                .padding()
-                .background(
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(colorScheme == .dark ? .darkGray : .white).opacity(0.1),
-                            Color(colorScheme == .dark ? .black : .gray).opacity(0.2),
-                        ]),
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .padding()
+            .background(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(colorScheme == .dark ? .darkGray : .white).opacity(0.1),
+                        Color(colorScheme == .dark ? .black : .gray).opacity(0.2),
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+    }
+    
+    private func MenuButton() -> some View {
+        Menu {
+            Button(action: { handleAction(.update) }) {
+                Label("Update Default Priorities Number", systemImage: "pencil")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.primary)
+                .frame(width: 44, height: 44)
+                .background(Color.clear)
+                .contentShape(Rectangle())
+        }
+        .menuStyle(BorderlessButtonMenuStyle())
+        .frame(width: 44, height: 44)
+    }
+
+    private func handleAction(_ action: ActionType?) {
+        guard let action = action else { return }
+        switch action {
+        case .update:
+            isUpdatingSettings = true
+        }
+    }
 }
