@@ -21,7 +21,7 @@ class ContextManagement {
                 for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil,
                 create: true
             )
-            .appendingPathComponent("unblur.sqlite")
+            .appendingPathComponent("unblurv1.sqlite")
 
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
             print("Error opening database")
@@ -29,14 +29,16 @@ class ContextManagement {
         }
 
         // Create tables
+        // date format = YYYY-MM-DD
         let createTable = """
                 CREATE TABLE IF NOT EXISTS priorities (
                     id TEXT PRIMARY KEY,
-                    timestamp DOUBLE,
+                    date TEXT,
                     text TEXT,
                     priority INTEGER,
                     is_edited INTEGER
                 );
+            
                 CREATE TABLE IF NOT EXISTS settings (
                     default_task_number INTEGER,
                     previous_day_task_view INTEGER
@@ -55,7 +57,7 @@ class ContextManagement {
                 for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil,
                 create: true
             )
-            .appendingPathComponent("unblur.sqlite")
+            .appendingPathComponent("unblurv3.sqlite")
 
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             return false
@@ -86,14 +88,14 @@ class ContextManagement {
 
     func savePriority(_ priority: Priority) {
         let insertSQL = """
-                INSERT OR REPLACE INTO priorities (id, timestamp, text, priority, is_edited)
+                INSERT OR REPLACE INTO priorities (id, date, text, priority, is_edited)
                 VALUES (?, ?, ?, ?, ?);
             """
         var statement: OpaquePointer?
 
         if sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_text(statement, 1, (priority.id as NSString).utf8String, -1, nil)
-            sqlite3_bind_double(statement, 2, priority.timestamp)
+            sqlite3_bind_text(statement, 2, (priority.date as NSString).utf8String, -1, nil)
             sqlite3_bind_text(statement, 3, (priority.text as NSString).utf8String, -1, nil)
             sqlite3_bind_int(statement, 4, Int32(priority.priority))
             sqlite3_bind_int(statement, 5, priority.isEdited ? 1 : 0)

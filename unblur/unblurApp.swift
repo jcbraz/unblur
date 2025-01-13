@@ -9,7 +9,7 @@ import SwiftUI
 
 @main
 struct UnblurApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
     
     var body: some Scene {
         WindowGroup {
@@ -25,6 +25,9 @@ struct UnblurApp: App {
                 }
                 .keyboardShortcut("q", modifiers: .command)
             }
+        }
+        MenuBarExtra("unblur", systemImage: "rectangle.stack", isInserted: $showMenuBarExtra) {
+            QuickLookMenu()
         }
     }
 }

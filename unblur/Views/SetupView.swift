@@ -35,10 +35,8 @@ struct SetupView: View {
             Button(action: savePreferences) {
                 Text("Get Started")
                     .font(.headline)
-                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
                     .cornerRadius(10)
             }
             .padding(.horizontal)

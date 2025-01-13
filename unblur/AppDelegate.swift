@@ -12,7 +12,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let priorityManager = PriorityManagement()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusBarController = StatusBarController(priorityManager: priorityManager)
+      let statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+      if let button = statusBarItem.button {
+        button.image = NSImage(named: NSImage.Name("rectangle.stack"))
+        button.title = "unblur"
+        button.action = #selector(statusBarButtonClicked(_:))
+        button.target = self
+        button.title = "Open Window"
+      }
+    }
+    
+    @objc func statusBarButtonClicked(_ sender: NSStatusBarButton) {
+      print("Menu item clicked")
+      // We'll implement the window handling logic here
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

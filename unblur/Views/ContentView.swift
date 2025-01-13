@@ -34,19 +34,24 @@ struct ContentView: View {
     }
 
     private func savePriorities() {
-        let currentTime = Date().timeIntervalSince1970
+        
+        var incomingPriorities: [Priority] = []
+        
         for (index, text) in priorities.enumerated() {
             if !text.isEmpty {
                 let priority = Priority(
                     id: UUID().uuidString,
-                    timestamp: currentTime,
+                    date: priorityManager.getTodayDateString(),
                     text: text,
                     priority: index + 1,
                     isEdited: false
                 )
-                priorityManager.insertPriority(priority)
+                
+                incomingPriorities.append(priority)
             }
         }
+        
+        priorityManager.upsertPriorities(incomingPriorities)
 
         showDisplayView = true
     }
@@ -69,7 +74,7 @@ struct ContentView: View {
                 currentPriorities.append(
                     Priority(
                         id: UUID().uuidString,
-                        timestamp: Date().timeIntervalSince1970,
+                        date: priorityManager.getTodayDateString(),
                         text: text,
                         priority: index + 1,
                         isEdited: false
@@ -130,7 +135,12 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                if showDisplayView {
+                
+                if isFirstLaunch {
+                    
+                    SetupView(isFirstLaunch: $isFirstLaunch, currentContext: $currentContext, contextManager: contextManager)
+                    
+                } else if showDisplayView {
                     let currentPriorities = getSubmittedPrioritiesObjects()
                     DisplayView(
                         priorities: currentPriorities,

@@ -14,7 +14,7 @@ struct PriorityContext {
 
 struct Priority: Identifiable {
     let id: String
-    var timestamp: TimeInterval
+    var date: String
     var text: String
     var priority: Int
     var isEdited: Bool

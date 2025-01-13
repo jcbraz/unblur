@@ -75,7 +75,7 @@ struct AddNewPriorityMenu: View {
 
         let incomingPriority = Priority(
             id: UUID().uuidString,
-            timestamp: Date().timeIntervalSince1970,
+            date: priorityManager.getTodayDateString(),
             text: additionalPriorityText,
             priority: additionalPriorityLevel,
             isEdited: false
