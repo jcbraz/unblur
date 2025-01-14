@@ -8,21 +8,14 @@
 import SwiftUI
 
 struct QuickLookMenu: View {
-    
-    @State private var dailyPriorities: [Priority]
-    
-    private let priorityManager = PriorityManagement()
-    
-    init() {
-        _dailyPriorities = State(initialValue: priorityManager.getCurrentDayPriorities())
-    }
+    @StateObject private var store = PriorityStore()
     
     var body: some View {
-        if dailyPriorities.isEmpty {
+        if store.dailyPriorities.isEmpty {
             Text("No priorities yet!")
         } else {
             VStack(alignment: .center, spacing: 15) {
-                ForEach(dailyPriorities.sorted(by: { $0.priority < $1.priority })) { priority in
+                ForEach(store.dailyPriorities.sorted(by: { $0.priority < $1.priority })) { priority in
                     HStack {
                         Text(priority.text)
                             .multilineTextAlignment(.leading)

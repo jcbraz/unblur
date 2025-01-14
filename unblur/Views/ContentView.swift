@@ -1,5 +1,9 @@
 import SwiftUI
 
+extension Notification.Name {
+    static let prioritiesDidUpdate = Notification.Name("prioritiesDidUpdate")
+}
+
 struct ContentView: View {
     @State private var showcasePreviousDayPriorities: Bool = true
     @State private var priorities: [String]
@@ -34,7 +38,6 @@ struct ContentView: View {
     }
 
     private func savePriorities() {
-        
         var incomingPriorities: [Priority] = []
         
         for (index, text) in priorities.enumerated() {
@@ -52,7 +55,7 @@ struct ContentView: View {
         }
         
         priorityManager.upsertPriorities(incomingPriorities)
-
+        NotificationCenter.default.post(name: .prioritiesDidUpdate, object: nil)
         showDisplayView = true
     }
 

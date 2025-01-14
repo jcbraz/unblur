@@ -26,8 +26,11 @@ struct UnblurApp: App {
                 .keyboardShortcut("q", modifiers: .command)
             }
         }
-        MenuBarExtra("unblur", systemImage: "rectangle.stack", isInserted: $showMenuBarExtra) {
+        
+        MenuBarExtra {
             QuickLookMenu()
+        } label: {
+            Label("unblur", systemImage: "rectangle.stack")
         }
     }
 }
