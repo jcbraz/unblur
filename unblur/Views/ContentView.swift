@@ -140,11 +140,20 @@ struct ContentView: View {
             ZStack {
                 
                 if isFirstLaunch {
-                    
-                    SetupView(isFirstLaunch: $isFirstLaunch, currentContext: $currentContext, contextManager: contextManager)
-                    
+                    SetupView(
+                        isFirstLaunch: $isFirstLaunch,
+                        currentContext: $currentContext,
+                        contextManager: contextManager
+                    )
                 } else if showDisplayView {
                     let currentPriorities = getSubmittedPrioritiesObjects()
+                    DisplayView(
+                        priorities: currentPriorities,
+                        showDisplayView: $showDisplayView,
+                        priorityManager: priorityManager
+                    )
+                } else if !priorityManager.getCurrentDayPriorities().isEmpty {
+                    let currentPriorities = priorityManager.getCurrentDayPriorities()
                     DisplayView(
                         priorities: currentPriorities,
                         showDisplayView: $showDisplayView,

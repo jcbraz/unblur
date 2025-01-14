@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import LaunchAtLogin
 
 @main
 struct UnblurApp: App {
     @AppStorage("showMenuBarExtra") private var showMenuBarExtra = true
+    @State private var launchAtLoginEnabled: Bool = true
     
     var body: some Scene {
         WindowGroup {
@@ -31,6 +33,12 @@ struct UnblurApp: App {
             QuickLookMenu()
         } label: {
             Label("unblur", systemImage: "rectangle.stack")
+        }
+        
+        Settings {
+            Form {
+                LaunchAtLogin.Toggle()
+            }
         }
     }
 }
