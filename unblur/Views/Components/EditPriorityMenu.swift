@@ -87,7 +87,7 @@ struct EditPriorityMenu: View {
         
         let newPriority = Priority(
             id: selectedPriority.id,
-            timestamp: Date().timeIntervalSince1970,
+            date: priorityManager.getTodayDateString(),
             text: newPriorityText,
             priority: newPriorityLevel,
             isEdited: true
