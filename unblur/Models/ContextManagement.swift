@@ -57,7 +57,7 @@ class ContextManagement {
                 for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil,
                 create: true
             )
-            .appendingPathComponent("unblurv3.sqlite")
+            .appendingPathComponent("unblurv1.sqlite")
 
         guard FileManager.default.fileExists(atPath: fileURL.path) else {
             return false
